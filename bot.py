@@ -28,4 +28,5 @@ application.add_handler(CommandHandler("start", start))
 if environment == "development":
     application.run_polling()
 else:
-    application.run_webhook(url_path="https://telegrambotforme-a46e78381e82.herokuapp.com/")
+    application.run_polling()
+    #application.run_webhook(url_path="https://telegrambotforme-a46e78381e82.herokuapp.com/")

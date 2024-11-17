@@ -1,20 +1,12 @@
 import os
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
-from dotenv import load_dotenv
+from telegram.ext import Application, CommandHandler
 
-load_dotenv()
+async def start(update: Update, context):
+    await update.message.reply_text("Hello! I am your bot.")
 
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Hello! I'm your bot.")
+TOKEN = os.getenv("TELEGRAM_BOT_API_TOKEN")
+application = Application.builder().token(TOKEN).build()
+application.add_handler(CommandHandler("start", start))
 
-def main():
-    TOKEN = os.getenv("TELEGRAM_BOT_API_TOKEN")
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("start", start))
-    updater.start_polling()
-    updater.idle()
-
-if __name__ == "__main__":
-    main()
+application.run_polling()

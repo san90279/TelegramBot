@@ -8,7 +8,6 @@ from telegram.ext import Application, CommandHandler,MessageHandler,filters
 load_dotenv()
 environment = os.getenv("ENV")
 token = os.getenv("TELEGRAM_BOT_TOKEN")
-print(token)
 
 async def start(update: Update, context):
     await update.message.reply_text("Hello! I am your bot.")

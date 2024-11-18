@@ -23,9 +23,9 @@ application = Application.builder().token(token).build()
 # 添加回聲處理器
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 application.add_handler(CommandHandler("start", start))
-application.run_polling()
+#application.run_polling()
 
-#if environment == "development":
-#    application.run_polling()
-#else:
-#    application.run_webhook(url_path="https://telegrambotforme-a46e78381e82.herokuapp.com/")
+if environment == "development":
+    application.run_polling()
+else:
+    application.run_webhook(url_path="https://telegrambotforme-a46e78381e82.herokuapp.com/")

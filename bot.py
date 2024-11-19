@@ -1,49 +1,34 @@
 import os
 from flask import Flask, request
-from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import Application, CommandHandler,MessageHandler,filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
+# 環境變數
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# 載入 .env 檔案
-load_dotenv()
-environment = os.getenv("ENV")
-token = os.getenv("TELEGRAM_BOT_TOKEN")
+# 建立 Application
+app = Application.builder().token(TOKEN).build()
 
-# Flask Web 應用
-app = Flask(__name__)
+# Flask 應用
+flask_app = Flask(__name__)
 
+# 指令處理函數
 async def start(update: Update, context):
-    await update.message.reply_text("Hello! I am your bot.")
-# 定義回聲處理函數
+    await update.message.reply_text("歡迎使用這個機器人！")
+
 async def echo(update: Update, context):
-    # 取得用戶發送的訊息
-    user_message = update.message.text
-    # 回應相同的訊息
-    await update.message.reply_text(user_message)
+    await update.message.reply_text(f"你說了：{update.message.text}")
 
-# Webhook 的路徑
-@app.route(f"/{token}", methods=["POST"])
+# 註冊處理器
+app.add_handler(CommandHandler("start", start))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+
+# Webhook 處理
+@flask_app.route('/webhook', methods=['POST'])
 def webhook():
-    """處理來自 Telegram 的 Webhook 請求"""
-    json_data = request.get_json()
-    update = Update.de_json(json_data, application.bot)
-    application.update_queue.put_nowait(update)
-    return "OK", 200
+    update = Update.de_json(request.get_json(force=True), app.bot)
+    app.process_update(update)
+    return "ok"
 
-@app.route("/", methods=["GET"])
-def index():
-    return "Bot is running!", 200
-
-application = Application.builder().token(token).build()
-# 添加回聲處理器
-application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-application.add_handler(CommandHandler("start", start))
-#application.run_polling()
-
-if environment == "development":
-    application.run_polling()
-else:
-    application.run_webhook(url_path=f"{HEROKU_APP_URL}/{token}")
-    # 啟動 Flask
-    app.run(debug=True, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+if __name__ == "__main__":
+    flask_app.run(port=5000)

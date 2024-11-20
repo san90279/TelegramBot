@@ -4,10 +4,10 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 # 環境變數
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+token = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # 建立 Application
-app = Application.builder().token(TOKEN).build()
+app = Application.builder().token(token).build()
 
 # Flask 應用
 flask_app = Flask(__name__)
@@ -28,6 +28,10 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 def webhook():
     update = Update.de_json(request.get_json(force=True), app.bot)
     app.process_update(update)
+    return "ok"
+
+@flask_app.route('/', methods=['GET'])
+def index():
     return "ok"
 
 if __name__ == "__main__":

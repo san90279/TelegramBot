@@ -35,4 +35,4 @@ def index():
     return "ok"
 
 if __name__ == "__main__":
-    flask_app.run(port=5000)
+    flask_app.run()

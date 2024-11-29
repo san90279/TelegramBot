@@ -40,6 +40,6 @@ updater.dispatcher.add_handler(CommandHandler('hi', hello))  # Hello World!
 # 改用 webhook 的方式
 updater.start_webhook(listen="0.0.0.0",
                       port=PORT,
-                      url_path=TOKEN)
+                      url_path=token)
 updater.bot.set_webhook("https://telegrambotforme.herokuapp.com/" + token)
 updater.idle()

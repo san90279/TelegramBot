@@ -1,45 +1,46 @@
 import os
-from configparser import ConfigParser
-
-from telegram.ext import Updater, CommandHandler
+import telegram
+from flask import Flask, request
 
 
 # 環境變數
 token = os.getenv("TELEGRAM_BOT_TOKEN")
 PORT = int(os.environ.get('PORT', '8443'))
+bot = telegram.Bot(token)
+
+app = Flask(__name__)
 
 
-updater = Updater(token=token)  # 呼叫 bot 用
-def welcome(bot, update):
-	""" Show user welcome message. """
-	
-	chat_id = update.message.from_user.id
-	
-	about_bot = ''
-	about_bot = about_bot + 'Hello! 感謝您的使用\n'
-	about_bot = about_bot + '本機器人由 [hms5232](https://medium.com/@hms5232) 開發\n'
-	about_bot = about_bot + '用於將機器人部署在 Heroku 上的教學文的範例\n'
-	about_bot = about_bot + '可於 [Github](https://github.com/hms5232) 上找到我\n'
-	about_bot = about_bot + '文章原文可在[repo簡介](https://github.com/hms5232/deploy-python-telegram-bot-on-heroku)上找到\n'
-	
-	bot.send_message(chat_id, about_bot, parse_mode='Markdown')
+@app.route('/{}'.format(token), methods=['POST'])
+def respond():
+    # retrieve the message in JSON and then transform it to Telegram object
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+
+    chat_id = update.message.chat.id
+    msg_id = update.message.message_id
+
+    # Telegram understands UTF-8, so encode text for unicode compatibility
+    text = update.message.text.encode('utf-8').decode()
+    print("got text message :", text)
 
 
-def hello(bot, update):
-	""" Hello World! """
-	
-	update.message.reply_text('Hello world!')
+    bot.sendMessage(chat_id=chat_id, text=text, reply_to_message_id=msg_id)
+
+    return 'ok'
+
+@app.route('/set_webhook', methods=['GET', 'POST'])
+def set_webhook():
+    s = bot.setWebhook("https://telegrambotforme.herokuapp.com/" + token)
+    if s:
+        return "webhook setup ok"
+    else:
+        return "webhook setup failed"
+
+@app.route('/')
+def index():
+    return '.'
 
 
-updater.dispatcher.add_handler(CommandHandler('start', welcome))  # 歡迎訊息
-updater.dispatcher.add_handler(CommandHandler('hi', hello))  # Hello World!
+if __name__ == '__main__':
+    app.run(threaded=True)
 
-
-# 執行機器人必須要的，讓機器人運作聽命
-#updater.start_polling()
-# 改用 webhook 的方式
-updater.start_webhook(listen="0.0.0.0",
-                      port=PORT,
-                      url_path=token)
-updater.bot.set_webhook("https://telegrambotforme.herokuapp.com/" + token)
-updater.idle()
